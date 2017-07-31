@@ -1,41 +1,30 @@
+// matrix is a package that defines a matrix type, and operations on it.
 package matrix
 
 import "fmt"
 
 // Matrix is a slice of slice of int of a specified size
-type Matrix [][]int
+type Matrix struct {
+	data [][]int
+}
 
 // New creates a new matrix with r rows and c columns
-func New(r int, c int) [][]int {
+func New(r int, c int) Matrix {
 	mat := make([][]int, r)
 	for i := range mat {
 		mat[i] = make([]int, c)
 	}
-	return mat
+	return Matrix{data: mat}
 }
 
-/*
-func PopulateMatrix(m [][]int) ([][]int){
-	len_r := len(m)
-	for i:=0; i<len_r; i++ {
-		c := m[i]
-		len_c := len(c)
-		for j:=0; j<len_c; j++ {
-			m[i][j] = rand.Intn(3)
-		}
-	}
-	return m
-}
-*/
-
-func isvalid(m1 [][]int, m2 [][]int) (valid bool) {
-	m1_len_r, m1_len_c, m2_len_r, m2_len_c := len(m1), len(m1[0]), len(m2), len(m2[0])
-	valid = (m1_len_r == m2_len_r && m1_len_c == m2_len_c)
+func isvalid(m1 Matrix, m2 Matrix) (valid bool) {
+	m1Lenr, m1Lenc, m2Lenr, m2Lenc := len(m1.data), len(m1.data[0]), len(m2.data), len(m2.data[0])
+	valid = (m1Lenr == m2Lenr && m1Lenc == m2Lenc)
 	return
 }
 
-func iterate(m1 [][]int, operation func(int, int)) {
-	for i, m1row := range m1 {
+func iterate(m1 Matrix, operation func(int, int)) {
+	for i, m1row := range m1.data {
 		for j := range m1row {
 			operation(i, j)
 		}
@@ -44,14 +33,14 @@ func iterate(m1 [][]int, operation func(int, int)) {
 
 // Add adds two matrices if their dimensions are the same
 // It returns a new matrix with the addition results,
-//   and the validity of the operation
-func Add(m1 [][]int, m2 [][]int) (res [][]int, valid bool) {
+// and the validity of the operation
+func Add(m1 Matrix, m2 Matrix) (res Matrix, valid bool) {
 	valid = isvalid(m1, m2)
 	if valid {
-		res = New(len(m1), len(m1[0]))
+		res = New(len(m1.data), len(m1.data[0]))
 
 		iterate(m1, func(i int, j int) {
-			res[i][j] = m1[i][j] + m2[i][j]
+			res.data[i][j] = m1.data[i][j] + m2.data[i][j]
 		})
 	}
 
@@ -60,14 +49,14 @@ func Add(m1 [][]int, m2 [][]int) (res [][]int, valid bool) {
 
 // Subtract subtracts two matrices, m2 from m1,  if their dimensions are the same
 // It returns a new matrix with the addition results,
-//   and the validity of the operation
-func Subtract(m1 [][]int, m2 [][]int) (res [][]int, valid bool) {
+// and the validity of the operation
+func Subtract(m1 Matrix, m2 Matrix) (res Matrix, valid bool) {
 	valid = isvalid(m1, m2)
 	if valid {
-		res = New(len(m1), len(m1[0]))
+		res = New(len(m1.data), len(m1.data[0]))
 
 		iterate(m1, func(i int, j int) {
-			res[i][j] = m1[i][j] - m2[i][j]
+			res.data[i][j] = m1.data[i][j] - m2.data[i][j]
 		})
 	}
 
@@ -75,7 +64,7 @@ func Subtract(m1 [][]int, m2 [][]int) (res [][]int, valid bool) {
 }
 
 // String returns a string representation of the matrix
-func String(m [][]int) string {
+func String(m Matrix) string {
 	result := ""
 
 	iterate(m, func(i int, j int) {
@@ -84,7 +73,7 @@ func String(m [][]int) string {
 			delim = "\n"
 		}
 
-		result = result + fmt.Sprintf("%s%4d", delim, m[i][j])
+		result = result + fmt.Sprintf("%s%4d", delim, m.data[i][j])
 
 	})
 
@@ -93,32 +82,43 @@ func String(m [][]int) string {
 	return result
 }
 
-/*
-func Multiply(m1 [][]int, m2 [][]int) ([][]int, bool){
-	m1_len_r := len(m1)
-	m1_len_c := len(m1[0])
-	m2_len_r := len(m2)
-	m2_len_c := len(m2[0])
-	res := GenerateMatrix(m1_len_r, m2_len_c)
-	var valid bool
-	valid = true
-	// fmt.Println(m1_len_r, m2_len_r, m1_len_c, m2_len_c)
-	if m1_len_c != m2_len_r {
-		valid = false
-	}
-	if valid {
-		var temp int
-		temp = 0
-		for i:=0; i<m1_len_r; i++ {
-			for j:=0; j<m1_len_c; j++ {
-				for k:=0; k<m1_len_c; k++ {
-					temp += m1[i][k] * m2[k][j]
-				}
-				res[i][j] = temp
-				temp = 0
-			}
-		}
-	}
-	return res, valid
+func (m *Matrix) Size() (int, int) {
+	return len(m.data), len(m.data[0])
 }
-*/
+
+func (m *Matrix) Set(x int, y int, value int) (result bool) {
+	rows, cols := m.Size()
+	if x < rows && x >= 0 && y < cols && y >= 0 {
+		m.data[x][y] = value
+		result = true
+	}
+	return
+}
+
+func (m *Matrix) Get(x int, y int) (result int) {
+	rows, cols := m.Size()
+	if x < rows && x >= 0 && y < cols && y >= 0 {
+		result = m.data[x][y]
+	}
+	return
+}
+
+func (m Matrix) String() string {
+	return String(m)
+}
+
+func (m *Matrix) Add(other Matrix) {
+	if isvalid(*m, other) {
+		iterate(*m, func(i int, j int) {
+			m.data[i][j] += other.data[i][j]
+		})
+	}
+}
+
+func (m *Matrix) Subtract(other Matrix) {
+	if isvalid(*m, other) {
+		iterate(*m, func(i int, j int) {
+			m.data[i][j] -= other.data[i][j]
+		})
+	}
+}
