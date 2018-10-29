@@ -9,7 +9,7 @@ import (
 
 func main() {
 	fmt.Println("Starting the application...")
-    var waitGroup sync.WaitGroup
+	var waitGroup sync.WaitGroup
 	var data chan string
 	data = make(chan string)
 
@@ -38,7 +38,7 @@ func worker(workerId int, data chan string, wg *sync.WaitGroup) {
 			fmt.Println("The channel is closed!")
 			break
 		}
-		fmt.Printf("Worker: %d; channel value: %s\n", workerId,value)
+		fmt.Printf("Worker: %d; channel value: %s\n", workerId, value)
 		time.Sleep(time.Second * 1)
 	}
 }
