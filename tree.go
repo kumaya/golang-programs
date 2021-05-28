@@ -130,6 +130,32 @@ func isMirror(r1, r2 *Node) bool {
 	return false
 }
 
+func inorder(root *Node) {
+	if root == nil {
+		return
+	}
+	inorder(root.left)
+	fmt.Println(root.data)
+	inorder(root.right)
+}
+
+func inorderIter(root *Node) {
+	var stack []*Node
+	stack = append(stack, root)
+	for len(stack) > 0{
+		root = stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+		for root != nil {
+			stack = append(stack, root)
+			root = root.left
+		}
+		top := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+		fmt.Println(top.data)
+		stack = append(stack, top.right)
+		}
+	}
+
 func main() {
 	root := Node{26,
 		&Node{10,
@@ -153,4 +179,9 @@ func main() {
 	fmt.Printf("\nisMirror: %t", isMirror(&root, &root1))
 
 	fmt.Printf("\nDiameter: %f", diameter(&root))
+
+	fmt.Printf("Inorder recursive: \n")
+	inorder(&root)
+	fmt.Println("")
+	inorderIter(&root)
 }
