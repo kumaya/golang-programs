@@ -10,8 +10,8 @@ import (
 func main() {
 	fmt.Println("Starting the application...")
 	var waitGroup sync.WaitGroup
-	var data chan string
-	data = make(chan string)
+	// var data chan string
+	data := make(chan string)
 
 	for i := 0; i < 3; i++ {
 		waitGroup.Add(1)
@@ -28,6 +28,7 @@ func main() {
 
 func worker(workerId int, data chan string, wg *sync.WaitGroup) {
 	fmt.Printf("Goroutine worker %d is starting...\n", workerId)
+	time.Sleep(2 * time.Second)
 	defer func(wg *sync.WaitGroup) {
 		fmt.Printf("Destroying the worker: %d\n", workerId)
 		wg.Done()

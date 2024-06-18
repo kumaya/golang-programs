@@ -1,23 +1,31 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"time"
 )
 
 type RateLimit interface {
 	Allow() bool
-	refill()
 }
 
 func main() {
+	log.Printf("===== TOKEN BUCKET =====")
 	rl := NewTokenBucket(3, 2*time.Second)
-	for i := 0; i < 20; i++ {
+	Run(rl)
+
+	log.Printf("===== LEAKY BUCKET =====")
+	rLB := NewLeakyBucket(3, 1*time.Second)
+	Run(rLB)
+}
+
+func Run(rl RateLimit) {
+	for i := 0; i < 10; i++ {
 		if rl.Allow() {
-			fmt.Println("allow")
+			log.Println("allow")
 		} else {
-			fmt.Println("deny")
+			log.Println("deny")
 		}
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(200 * time.Millisecond)
 	}
 }

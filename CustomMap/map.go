@@ -10,6 +10,7 @@ import (
 type customMap interface {
 	Get(key interface{}) (value interface{}, exists bool)
 	Set(key, value interface{}) bool
+	Delete(key interface{}) bool
 	Len() int
 }
 
@@ -51,6 +52,23 @@ func (c *cMap) Set(key, value interface{}) bool {
 		c.storage[slot] = append(c.storage[slot], &KeyValue{key, value})
 		c.length += 1
 	}
+	fmt.Printf("%v\n", c.storage)
+	return true
+}
+
+func (c *cMap) Delete(key interface{}) bool {
+	keyHash := getKeyHash(stringer(key))
+	slot := keyHash % c.capacity
+	if len(c.storage[slot]) == 0 {
+		return false
+	}
+	for i, elem := range c.storage[slot] {
+		if elem.Key == key {
+			c.storage[slot] = append(c.storage[slot][:i], c.storage[slot][i+1:]...)
+			c.length -= 1
+			continue
+		}
+	}
 	return true
 }
 
@@ -59,14 +77,37 @@ func (c *cMap) Len() int {
 }
 
 func NewCMap() *cMap {
-	capa := uint64(100)
+	capa := uint64(10)
 	storage := make([][]*KeyValue, capa)
-	return &cMap{
+	cm := cMap{
 		storage:  storage,
 		capacity: capa,
 		length:   0,
 	}
+	//go cm.resize()
+	return &cm
 }
+
+// TODO
+//func (c *cMap) resize() {
+//	for {
+//		if float32(c.length) < (float32(c.capacity) * 0.8) {
+//			time.Sleep(500 * time.Millisecond)
+//			continue
+//		}
+//		fmt.Printf("=== resizing ===\n")
+//		c.capacity = c.capacity * 10
+//		newStorage := make([][]*KeyValue, c.capacity)
+//		oldStorage := c.storage
+//		for _, slots := range oldStorage {
+//			for _, elem := range slots {
+//				newSlot := getKeyHash(stringer(elem.Key)) % c.capacity
+//
+//			}
+//		}
+//		copy(c.storage, newStorage)
+//	}
+//}
 
 func main() {
 	myMap := NewCMap()
@@ -80,6 +121,10 @@ func main() {
 	fmt.Printf("%s:%v:%v\n", k, val, isExists)
 
 	myMap.Set(k, "updated")
+	val, isExists = myMap.Get(k)
+	fmt.Printf("%s:%v:%v\n", k, val, isExists)
+
+	myMap.Delete(k)
 	val, isExists = myMap.Get(k)
 	fmt.Printf("%s:%v:%v\n", k, val, isExists)
 
@@ -103,4 +148,20 @@ func main() {
 	myMap.Set(k2, "struct")
 	val, isExists = myMap.Get(Temp{age: 12, name: "mayank"})
 	fmt.Printf("%v:%v:%v\n", k2, val, isExists)
+
+	myMap.Set("1", "int2")
+	myMap.Set("2", "int3")
+	myMap.Set("3", "int4")
+	myMap.Set("4", "int5")
+	myMap.Set(5, "int6")
+	myMap.Set(6, "int7")
+	myMap.Set(10, "int7")
+	myMap.Set(11, "int7")
+	myMap.Set(12, "int7")
+	myMap.Set("12", "int7")
+	myMap.Set("13", "int7")
+	myMap.Set("144", "int0")
+	val, isExists = myMap.Get("144")
+	fmt.Printf("%v:%v:%v\n", 12, val, isExists)
+
 }

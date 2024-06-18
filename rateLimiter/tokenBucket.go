@@ -43,11 +43,12 @@ func (r *TokenBucket) refill() {
 	defer r.lock.Unlock()
 	timeElapsedSinceLastRefill := time.Since(r.lastRefillTime)
 	tokensToFill := timeElapsedSinceLastRefill / r.refillRate
+	partialTime := timeElapsedSinceLastRefill % r.refillRate
 	if tokensToFill > 0 {
 		r.token += tokensToFill.Nanoseconds()
 		if r.token >= r.capacity {
 			r.token = r.capacity
 		}
-		r.lastRefillTime = time.Now()
+		r.lastRefillTime = time.Now().Add(-partialTime)
 	}
 }
